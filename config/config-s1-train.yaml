@@ -1,0 +1,58 @@
+tag: GeometrySegmentation-CoronaryArtery-s1
+
+dataset:
+  defin_path: ./dataset.py
+  defin_parm: {}
+  batch_size: 128
+  num_worker: 64
+  isdroplast: false
+  is_shuffle: true
+  defin_sampler: null
+  param_sampler: {}
+
+network:
+  use_cuda: true
+  use_parallel: true
+  modules:
+    Unet:
+      defin_path: './models/VoxelSeg.py'
+      defin_parm: {in_channels: 1, out_channels: 1, channels: [64, 128, 256]}
+      cur_params: &cur_params null
+      int_method: &int_method kaiming
+      optimizers: &optimizers {type: Adam, lr: 1.0e-3, cur_params: null}
+      schedulers: &schedulers {type: CosineAnnealingLR, half_cycle: 200, eta_min: 1.0e-6}
+
+    Gseg:
+      defin_path: './models/GraphSeg.py'
+      defin_parm: {coords_dim: 3, hidden_dim: 192, feats_dims: [128, 64, 32]}
+      cur_params: *cur_params
+      int_method: *int_method
+      optimizers: *optimizers
+      schedulers: *schedulers
+
+  criterions:
+    Imageloss:
+      defin_path: './models/ImageLoss.py'
+      defin_parm: {}
+      weight: 1
+
+
+    Graphloss:
+      defin_path: './models/GraphLoss.py'
+      defin_parm: {}
+      weight: 1
+
+
+trainer:
+  checkpoint_mode: {dire: ./checkpoints, type: key_epoch}
+  validation_step: 2
+  threshold_grad: 1e5
+  total_epoches: 210
+  current_epoch: 1
+
+
+monitor:
+  index: chamfer
+  logger: true
+  stdstream: true
+  tensorboardx: true

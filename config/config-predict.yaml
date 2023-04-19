@@ -1,0 +1,26 @@
+tag: GeometrySegmentation-CoronaryArtery
+
+dataset:
+  defin_path: ./dataset.py
+  defin_parm: {}
+  batch_size: 128
+  num_worker: 64
+  isdroplast: false
+  is_shuffle: true
+  defin_sampler: null
+  param_sampler: {}
+
+network:
+  use_cuda: true
+  use_parallel: true
+  modules:
+    Unet:
+      defin_path: './models/VoxelSeg.py'
+      defin_parm: {in_channels: 1, out_channels: 1, channels: [64, 128, 256]}
+      cur_params: "./checkpoints/Tag-GeometrySegmentation-CoronaryArtery-s2.pth"
+
+    Gseg:
+      defin_path: './models/GraphSeg.py'
+      defin_parm: {coords_dim: 3, hidden_dim: 192, feats_dims: [128, 64, 32]}
+      cur_params: "./checkpoints/Tag-GeometrySegmentation-CoronaryArtery-s2.pth"
+
